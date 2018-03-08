@@ -1,0 +1,130 @@
+#include <Windows.h>
+#include <GL\glew.h>
+#include <GL\freeglut.h>
+#include <iostream>
+using namespace std;
+int x, y;
+void changeView(int w, int h)
+{
+	glViewport(0, 0, w, h);
+}
+void myinit(void)
+{
+	glClearColor(1.0, 1.0, 1.0, 0.0);
+	glMatrixMode(GL_PROJECTION);
+	gluOrtho2D(0.0, 640.0, 0.0, 480.0);
+}
+void setPixel(GLint x, GLint y){
+	glPointSize(2);
+	glBegin(GL_POINTS);
+	glColor3f(1, 0, 0);
+	glVertex2i(x, y);
+	glEnd();
+	glFlush();
+}
+
+void plot(int x, int y){
+	glPointSize(4);
+	glBegin(GL_POINTS);
+	glColor3f(0, 0, 1);
+	glVertex2i(x, y);
+	glEnd();
+}
+
+void render(){
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	int xc, yc, x, y; 
+	float p;
+	long a, b;
+	xc = 100; yc = 100;
+	a = 100; b = 50;
+	
+
+	//Region 1
+	p = b*b - a*a*b + a*a / 4;
+	x = 0; y = b;
+	//setPixel(xc + a, yc + b);
+	while (2.0*b*b*x <= 2.0*a*a*y)
+	{
+		if (p <= 0)
+		{
+			x++;
+			//p = p + 2 * b*b*x + b*b;
+			p = p + (b*b)*(2 * x + 3);
+		}
+		else
+		{
+			x++; y--;
+			//p = p + 2 * b*b*x - 2 * a*a*y - b*b;
+			p = p + (b*b)*(2 * x + 3)- 2*a*a*(y-1);
+		}
+		setPixel(xc + x, yc + y);
+		setPixel(xc + x, yc - y);
+		setPixel(xc - x, yc + y);
+		setPixel(xc - x, yc - y);
+	}
+
+	//Region 2
+	p = b*b*(x + 0.5)*(x + 0.5) + a*a*(y - 1)*(y - 1) - a*a*b*b;
+	while (y > 0)
+	{
+		if (p <= 0)
+		{
+			x++; y--;
+			//p = p + 2 * b*b*x - 2 * a*a*y + a*a;
+			p = p + a*a*(3 - 2 * y)+2*b*b*(x+1);
+		}
+		else
+		{
+			y--;
+			//p = p - 2 * a*a*y + a*a;
+			p = p + a*a*(3 - 2 * y);
+		}
+		setPixel(xc + x, yc + y);
+		setPixel(xc + x, yc - y);
+		setPixel(xc - x, yc + y);
+		setPixel(xc - x, yc - y);
+	}
+	
+	glutSwapBuffers();
+
+}
+
+void display(){
+	glClear(GL_COLOR_BUFFER_BIT);
+	render();
+	glFlush();
+}
+int main(int argc, char* argv[]){
+
+	glutInit(&argc, argv);  // Initialize glut
+
+	//create memob buffers to display
+
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+
+	glutInitWindowSize(800, 600); // window size
+
+	glutCreateWindow("Flag");  // create window
+
+	glutReshapeFunc(changeView);
+
+	//glutDisplayFunc(render);
+
+	glutDisplayFunc(display);//links the display event with the display event handler(display)
+	myinit();
+	glutIdleFunc(render);
+
+
+	GLenum error = glewInit();
+
+	if (GLEW_OK != error){
+		fprintf(stderr, "Glew error");
+		return 1;
+	}
+
+
+	glutMainLoop();
+	return 0;
+}

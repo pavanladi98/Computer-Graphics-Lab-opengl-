@@ -1,0 +1,273 @@
+#include <Windows.h>
+#include <GL\glew.h>
+#include <GL\freeglut.h>
+#include <iostream>
+using namespace std;
+int x, y,xc,yc,a,b,lpk,r;
+void changeView(int w, int h)
+{
+	glViewport(0, 0, w, h);
+}
+void myinit(void)
+{
+	glClearColor(1.0, 1.0, 1.0, 0.0);
+	glMatrixMode(GL_PROJECTION);
+	gluOrtho2D(0.0, 640.0, 0.0, 480.0);
+}
+void setPixel(GLint x, GLint y){
+	glPointSize(2);
+	glBegin(GL_POINTS);
+	glColor3f(1, 0, 0);
+	glVertex2i(x, y);
+	glEnd();
+	glFlush();
+}
+
+void plot(int x, int y){
+	glPointSize(4);
+	glBegin(GL_POINTS);
+	glColor3f(0, 0, 1);
+	glVertex2i(x, y);
+	glEnd();
+}
+int circlecheck(int x, int y){
+	float m=(x-xc)*(x-xc)+(y-yc)*(y-yc)-r*r;
+	if(m<=0)
+		return 1;
+	else
+		return 0;
+}
+void drawellipse(int xc,int yc,int a,int b){
+	int  x, y; 
+	float p;
+	//Region 1
+	p = b*b - a*a*b + a*a / 4;
+	x = 0; y = b;
+	//setPixel(xc + a, yc + b);
+	while (2.0*b*b*x <= 2.0*a*a*y)
+	{
+		if (p <= 0)
+		{
+			x++;
+			//p = p + 2 * b*b*x + b*b;
+			p = p + (b*b)*(2 * x + 3);
+		}
+		else
+		{
+			x++; y--;
+			//p = p + 2 * b*b*x - 2 * a*a*y - b*b;
+			p = p + (b*b)*(2 * x + 3)- 2*a*a*(y-1);
+		}
+		
+
+		setPixel(xc + x, yc + y);
+		setPixel(xc + x, yc - y);
+		setPixel(xc - x, yc + y);
+		setPixel(xc - x, yc - y);
+	}
+
+	//Region 2
+	p = b*b*(x + 0.5)*(x + 0.5) + a*a*(y - 1)*(y - 1) - a*a*b*b;
+	while (y > 0)
+	{
+		if (p <= 0)
+		{
+			x++; y--;
+			//p = p + 2 * b*b*x - 2 * a*a*y + a*a;
+			p = p + a*a*(3 - 2 * y)+2*b*b*(x+1);
+		}
+		else
+		{
+			y--;
+			//p = p - 2 * a*a*y + a*a;
+			p = p + a*a*(3 - 2 * y);
+		}
+		setPixel(xc + x, yc + y);
+		setPixel(xc + x, yc - y);
+		setPixel(xc - x, yc + y);
+		setPixel(xc - x, yc - y);
+	}
+}
+
+void drawellipse1(int xc,int yc,int a,int b){
+	int  x, y; 
+	float p;
+	//Region 1
+	p = b*b - a*a*b + a*a / 4;
+	x = 0; y = b;
+	//setPixel(xc + a, yc + b);
+	while (2.0*b*b*x <= 2.0*a*a*y)
+	{
+		if (p <= 0)
+		{
+			x++;
+			//p = p + 2 * b*b*x + b*b;
+			p = p + (b*b)*(2 * x + 3);
+		}
+		else
+		{
+			x++; y--;
+			//p = p + 2 * b*b*x - 2 * a*a*y - b*b;
+			p = p + (b*b)*(2 * x + 3)- 2*a*a*(y-1);
+		}
+		
+		if(circlecheck(xc+x,yc+y))
+			setPixel(xc + x, yc + y);
+		if(circlecheck(xc+x,yc-y))
+			setPixel(xc + x, yc - y);
+		if(circlecheck(xc-x,yc+y))
+			setPixel(xc - x, yc + y);
+		if(circlecheck(xc-x,yc-y))
+			setPixel(xc - x, yc - y);
+	}
+
+	//Region 2
+	p = b*b*(x + 0.5)*(x + 0.5) + a*a*(y - 1)*(y - 1) - a*a*b*b;
+	while (y > 0)
+	{
+		if (p <= 0)
+		{
+			x++; y--;
+			//p = p + 2 * b*b*x - 2 * a*a*y + a*a;
+			p = p + a*a*(3 - 2 * y)+2*b*b*(x+1);
+		}
+		else
+		{
+			y--;
+			//p = p - 2 * a*a*y + a*a;
+			p = p + a*a*(3 - 2 * y);
+		}
+		if(circlecheck(xc+x,yc+y))
+			setPixel(xc + x, yc + y);
+		if(circlecheck(xc+x,yc-y))
+			setPixel(xc + x, yc - y);
+		if(circlecheck(xc-x,yc+y))
+			setPixel(xc - x, yc + y);
+		if(circlecheck(xc-x,yc-y))
+			setPixel(xc - x, yc - y);
+	}
+}
+
+void render(){
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	int p=a/10;
+	int c=30;
+	while(a>0){
+	drawellipse(xc,yc,a,b);
+	a-=p;
+	drawellipse(xc,yc,a,b);
+	a-=p;
+	drawellipse(xc,yc,a,b);
+	a-=p;
+	drawellipse(xc,yc,a,b);
+	a-=p;
+	}
+	glutSwapBuffers();
+
+}
+
+void render1(){
+	int xc1,xc2,yc1,yc2,a1=r,a2=r,b1=r,b2=r;
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	int p=a/10;
+	int c=30;
+	a-=10;
+	b-=20;
+	xc1=xc;xc2=xc;yc1=yc+lpk;yc2=yc-lpk;
+	drawellipse(xc,yc,100,0);
+	while(a>0){
+	a1=b;b1=a;
+	cout<<"hi"<<endl;
+	drawellipse1(xc1,yc1,a1,b1);
+	drawellipse1(xc2,yc2,a1,b1);
+	a-=20;
+	b-=20;
+	a2=b;
+	b2=a;
+	drawellipse1(xc1,yc1,a2,b2);
+	
+	drawellipse1(xc2,yc2,a2,b2);
+	
+	a-=20;
+	b-=20;
+
+	a1=b;b1=a;
+	cout<<"hi"<<endl;
+	drawellipse1(xc1,yc1,a1,b1);
+	drawellipse1(xc2,yc2,a1,b1);
+	a-=20;
+	b-=20;
+	a2=b;
+	b2=a;
+	drawellipse1(xc1,yc1,a2,b2);
+	
+	drawellipse1(xc2,yc2,a2,b2);
+	
+	a-=20;
+	b-=20;
+	
+	}
+	glutSwapBuffers();
+
+}
+
+void display(){
+	glClear(GL_COLOR_BUFFER_BIT);
+	int c=100;
+	while(c--){
+    a=lpk;
+	b=lpk;
+	render();
+	
+	a=lpk;
+	b=lpk;
+	render1();
+
+	//Sleep(500);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glFlush();
+	}
+	
+}
+
+
+int main(int argc, char* argv[]){
+	cout << "Enter the coordinates of the center:\n\n" << endl;
+
+	cout << "X-coordinate   : "; cin >> xc;
+	cout << "\nY-coordinate : "; cin >> yc;
+	cout << "\nEnter a : "; cin >> a;
+	lpk=a;
+	r=a;
+	cout << "\nEnter b : "; cin >> b;
+
+	glutInit(&argc, argv);  // Initialize glut
+
+	//create memob buffers to display
+
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+
+	glutInitWindowSize(800, 600); // window size
+
+	glutCreateWindow("Flag");  // create window
+
+	glutReshapeFunc(changeView);
+
+	//glutDisplayFunc(render);
+
+	glutDisplayFunc(display);//links the display event with the display event handler(display)
+	myinit();
+	glutIdleFunc(render);
+
+
+	GLenum error = glewInit();
+
+	if (GLEW_OK != error){
+		fprintf(stderr, "Glew error");
+		return 1;
+	}
+
+
+	glutMainLoop();
+	return 0;
+}
