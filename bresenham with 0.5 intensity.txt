@@ -1,0 +1,119 @@
+#include<iostream>
+#include<math.h>
+#include<GL/glut.h>
+using namespace std;
+
+int X1,X2,Y1,Y2;
+/* Function that returns -1,0,1 depending on whether x */
+/* is <0, =0, >0 respectively */
+#define sign(x) ((x>0)?1:((x<0)?-1:0));
+
+/* Function to plot a point */
+void setPixel(GLint x, GLint y,GLfloat c1,GLfloat c2,GLfloat c3) {
+  glColor3f(c1,c2,c3);
+  glBegin(GL_POINTS);
+  glVertex2i(x,y);
+  glEnd();
+}
+
+/* Generalized Bresenham's Algorithm */
+void bres_general(int x1, int y1, int x2, int y2)
+{
+  int dx, dy, x, y, p, s1, s2, swap=0, temp;
+
+  dx = abs(x2 - x1);
+  dy = abs(y2 - y1);
+  s1 = sign(x2-x1);
+  s2 = sign(y2-y1);
+
+  /* Check if dx or dy has a greater range */
+  /* if dy has a greater range than dx swap dx and dy */
+  if(dy > dx){temp = dx; dx = dy; dy = temp; swap = 1;}
+
+  /* Set the initial decision parameter and the initial point */
+  p = 2 * dy - dx;
+  x = x1;
+  y = y1;
+
+  setPixel(x,y,1.0,1.0,1.0);
+  int i;
+  for(int i=0;i<dx;i++)
+  {
+          if(p>0)
+          {
+                  setPixel(x+1,y+1,1.0,1.0,1.0);
+                  setPixel(x,y+1,0.5,0.5,0.5);
+                  p = p - 2*dx + 2*dy;
+                  x = x+1;
+                  y = y+1;
+          }
+          else
+          {
+                  setPixel(x+1,y,1.0,1.0,1.0);
+                  setPixel(x+1,y-1,0.5,0.5,0.5);
+                  p = p + 2*dy;
+                  x = x+1;
+          }
+  }
+  /*
+  int i;
+  for(i = 1; i <= dx; i++)
+  {
+    setPixel(x,y,1.0,1.0,1.0);
+    
+    while(d >= 0) 
+    {
+      if(swap) x = x + s1;
+      else 
+      {
+        y = y + s2;
+        d = d - 2* dx;
+      }
+    }
+    if(swap) y = y + s2;
+    else x = x + s1;
+    d = d + 2 * dy;
+  }
+  */
+  glFlush();
+}
+
+/* Function to draw a rhombus inscribed in a rectangle and roll */
+/* number printed in it */
+void draw(void)
+{
+  glClear(GL_COLOR_BUFFER_BIT);
+ 
+  /* Draw line */
+  bres_general(X1,Y1,X2,Y2);
+        
+
+  glFlush();
+}
+
+void init() {  
+  glutInitDisplayMode(GLUT_SINGLE|GLUT_RGB);
+  glutInitWindowPosition(0,0);
+  glutInitWindowSize(640, 480);
+  glutCreateWindow("Breshnam Algorithm");
+  glClearColor(0.0,0.0,0.0,0);
+  glColor3f(1.0,1.0,1.0);
+  gluOrtho2D(0,640,0,480);
+  
+}
+
+int main(int argc, char **argv) 
+{
+  printf("Enter two end points of the line to be drawn:\n");
+  printf("\n************************************");
+  printf("\nEnter Point1( X1 , Y1):\n");
+  scanf("%d %d",&X1,&Y1);
+  printf("\n************************************");
+  printf("\nEnter Point1( X2 , Y2):\n");
+  scanf("%d %d",&X2,&Y2);
+  glutInit(&argc, argv);
+  init();
+  glutDisplayFunc(draw);
+  glutMainLoop();
+  return 0;
+}
